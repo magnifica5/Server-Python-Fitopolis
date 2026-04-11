@@ -31,6 +31,24 @@ def send_email(to, message):
         server.login(EMAIL, EMAIL_PASS)
         server.send_message(msg)
 
+def send_verification_email(to, message):
+    msg = MIMEText(message)
+    msg['Subject'] = 'Cod de verificare adresă de email'
+    msg['from'] = EMAIL
+    msg['To'] = to
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        server.login(EMAIL, EMAIL_PASS)
+        server.send_message(msg)
+
+def send_verification_password(to, message):
+    msg = MIMEText(message)
+    msg['Subject'] = 'Cod pentru resetarea parolei'
+    msg['from'] = EMAIL
+    msg['To'] = to
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        server.login(EMAIL, EMAIL_PASS)
+        server.send_message(msg)
+
 @app.route("/trimite", methods=["POST"])
 # atunci cand requestul este dat in zona /trimite din url, se permite doat Post
 # restul de tip get etc nu sunt acceptate de server => SECURITATE
@@ -44,9 +62,21 @@ def get_data():
     data = request.json
     # extrage data transmisa in godot
     email_parent = data.get("email")
-    activities = data.get("activitati", [])
-    message = "Copilul a realizat azi: " + "\n-" + "\n- ".join(activities)
-    send_email(email_parent, message)
+    email_type = data.get("type")
+    if email_type == "daily":
+        activities = data.get("activitati", [])
+        message = "Copilul a realizat azi: " + "\n-" + "\n- ".join(activities)
+        send_email(email_parent, message)
+    elif email_type == "verification":
+        code = data.get("code")
+        message = f"Codul de verificare al emailului este: {code}."
+        send_verification_email(email_parent, message)
+    elif email_type == "verification_password":
+        code = data.get("code")
+        message = f"Codul pentru resetarea parolei este: {code}."
+        send_verification_password(email_parent, message)
+    else:
+        abort(403)
     return {"status": "ok"}
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
