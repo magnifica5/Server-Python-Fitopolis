@@ -59,7 +59,9 @@ def get_data():
     if auth != f"Bearer {API_KEY}":
         abort(403)
     # se verifica o cheie => SECURITATE
-    data = request.json
+    data = request.get_json(silent=True)
+    if not data:
+        return {"error": "Invalid JSON"}, 400
     # extrage data transmisa in godot
     email_parent = data.get("email")
     email_type = data.get("type")
