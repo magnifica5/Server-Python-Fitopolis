@@ -48,7 +48,9 @@ def send_verification_password(to, message):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
         server.login(EMAIL, EMAIL_PASS)
         server.send_message(msg)
-
+@app.route("/")
+def health():
+    return {"status": "ok"}
 @app.route("/trimite", methods=["POST"])
 # atunci cand requestul este dat in zona /trimite din url, se permite doat Post
 # restul de tip get etc nu sunt acceptate de server => SECURITATE
