@@ -1,8 +1,8 @@
 from flask import Flask, request, abort
 import os
-import smtplib
 import threading
-from email.mime.text import MIMEText
+import urllib.request
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,34 +10,30 @@ app = Flask(__name__)
 
 API_KEY = os.getenv('API_KEY')
 EMAIL = os.getenv('EMAIL')
-EMAIL_PASS = os.getenv('EMAIL_PASS')
+SENDGRID_KEY = os.getenv('SENDGRID_KEY')
 
-def send_email(to, message):
-    msg = MIMEText(message)
-    msg['Subject'] = 'Raport zilnic activități copil'
-    msg['From'] = EMAIL
-    msg['To'] = to
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-        server.login(EMAIL, EMAIL_PASS)
-        server.send_message(msg)
+def send_via_sendgrid(to, subject, message):
+    data = json.dumps({
+        "personalizations": [{"to": [{"email": to}]}],
+        "from": {"email": EMAIL},
+        "subject": subject,
+        "content": [{"type": "text/plain", "value": message}]
+    }).encode("utf-8")
 
-def send_verification_email(to, message):
-    msg = MIMEText(message)
-    msg['Subject'] = 'Cod de verificare adresă de email'
-    msg['From'] = EMAIL
-    msg['To'] = to
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-        server.login(EMAIL, EMAIL_PASS)
-        server.send_message(msg)
-
-def send_verification_password(to, message):
-    msg = MIMEText(message)
-    msg['Subject'] = 'Cod pentru resetarea parolei'
-    msg['From'] = EMAIL
-    msg['To'] = to
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-        server.login(EMAIL, EMAIL_PASS)
-        server.send_message(msg)
+    req = urllib.request.Request(
+        "https://api.sendgrid.com/v3/mail/send",
+        data=data,
+        headers={
+            "Authorization": f"Bearer {SENDGRID_KEY}",
+            "Content-Type": "application/json"
+        },
+        method="POST"
+    )
+    try:
+        with urllib.request.urlopen(req) as response:
+            print(f"Email trimis, status: {response.status}")
+    except Exception as e:
+        print(f"EROARE SendGrid: {e}")
 
 @app.route("/")
 def health():
@@ -58,18 +54,18 @@ def get_data():
 
     if email_type == "daily":
         activities = data.get("activitati", [])
-        message = "Copilul a realizat azi: " + "\n-" + "\n- ".join(activities)
-        threading.Thread(target=send_email, args=(email_parent, message)).start()
+        message = "Copilul a realizat azi: \n- " + "\n- ".join(activities)
+        threading.Thread(target=send_via_sendgrid, args=(email_parent, "Raport zilnic activități copil", message)).start()
 
     elif email_type == "verification":
         code = data.get("code")
         message = f"Codul de verificare al emailului este: {code}."
-        threading.Thread(target=send_verification_email, args=(email_parent, message)).start()
+        threading.Thread(target=send_via_sendgrid, args=(email_parent, "Cod de verificare adresă de email", message)).start()
 
     elif email_type == "verification_password":
         code = data.get("code")
         message = f"Codul pentru resetarea parolei este: {code}."
-        threading.Thread(target=send_verification_password, args=(email_parent, message)).start()
+        threading.Thread(target=send_via_sendgrid, args=(email_parent, "Cod pentru resetarea parolei", message)).start()
 
     else:
         abort(403)
