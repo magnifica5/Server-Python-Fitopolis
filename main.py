@@ -32,8 +32,11 @@ def send_via_sendgrid(to, subject, message):
     try:
         with urllib.request.urlopen(req) as response:
             print(f"Email trimis, status: {response.status}")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")
+        print(f"EROARE SendGrid {e.code}: {body}")
     except Exception as e:
-        print(f"EROARE SendGrid: {e}")
+        print(f"EROARE generala: {e}")
 
 @app.route("/")
 def health():
@@ -71,31 +74,7 @@ def get_data():
         abort(403)
 
     return {"status": "ok"}
-def send_via_sendgrid(to, subject, message):
-    data = json.dumps({
-        "personalizations": [{"to": [{"email": to}]}],
-        "from": {"email": EMAIL},
-        "subject": subject,
-        "content": [{"type": "text/plain", "value": message}]
-    }).encode("utf-8")
 
-    req = urllib.request.Request(
-        "https://api.sendgrid.com/v3/mail/send",
-        data=data,
-        headers={
-            "Authorization": f"Bearer {SENDGRID_KEY}",
-            "Content-Type": "application/json"
-        },
-        method="POST"
-    )
-    try:
-        with urllib.request.urlopen(req) as response:
-            print(f"Email trimis, status: {response.status}")
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8")
-        print(f"EROARE SendGrid {e.code}: {body}")
-    except Exception as e:
-        print(f"EROARE generala: {e}")
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
