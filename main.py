@@ -12,7 +12,6 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 scheduler = APScheduler()
-
 # Variabile de mediu
 EMAIL_SENDER = os.getenv("EMAIL")  # Adresa ta de Gmail
 EMAIL_PASS = os.getenv("EMAIL_PASS")  # Parola de aplicație Google (16 caractere)
@@ -134,8 +133,11 @@ def check_midtime_alerts():
 # Inițializare scheduler (în afara main pentru a fi sigur că pornește pe Render)
 if not scheduler.running:
     scheduler.init_app(app)
-    scheduler.add_job(id='check_alerts', func=check_midtime_alerts, trigger='interval', minutes=5)
+    scheduler.add_job(id='check_alerts', func=check_midtime_alerts, trigger='interval', minutes=1)
     scheduler.start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+@app.route('/')
+def home():
+    return "OK", 200
