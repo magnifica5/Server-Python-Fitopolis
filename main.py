@@ -46,9 +46,16 @@ def get_parent_email(parent_id):
     except Exception as e:
         print(f"Eroare Supabase Auth: {e}")
         return None
-
+if not scheduler.running:
+    scheduler.init_app(app)
+    scheduler.add_job(id='check_alerts', func=check_midtime_alerts, trigger='interval', minutes=1)
+    scheduler.start()
+    print("APScheduler a pornit cu succes.") # Adaugă acest log
+else:
+    print("APScheduler rulează deja.") # Adaugă acest log
 
 def check_midtime_alerts():
+    print(f"[{datetime.now()}] Rulăm check_midtime_alerts...")
     children_res = supabase.table("children").select("*").execute()
     progres_res = supabase.table("progres_copil").select("*").execute()
     progres_dict = {p['connection_code']: p for p in progres_res.data}
