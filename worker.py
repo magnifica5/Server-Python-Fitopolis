@@ -126,7 +126,7 @@ def check_midtime_alerts():
 scheduler = APScheduler()
 if not scheduler.running:
     scheduler.init_app(None) # Nu mai avem nevoie de instanța Flask aici
-    scheduler.add_job(id=\'check_alerts\', func=check_midtime_alerts, trigger=\'interval\', minutes=1)
+    scheduler.add_job(id='check_alerts', func=check_midtime_alerts, trigger='interval', minutes=1)
     scheduler.start()
     print("APScheduler a pornit cu succes în worker.")
 else:
