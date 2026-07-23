@@ -96,7 +96,13 @@ def check_midtime_alerts():
                     year=now.year, month=now.month, day=now.day
                 )
                 v_end = v_start + timedelta(minutes=7)
-
+                if now.hour == v_start.hour and now.minute == v_start.minute:
+                    response = (
+                        supabase.table("children")
+                        .update({"check_verificare": True})
+                        .eq("connection_code", code)
+                        .execute()
+                    )
                 if v_start <= now < v_end:
                     realizate = []
                     nerealizate = []
@@ -119,23 +125,6 @@ def check_midtime_alerts():
                         "\n- ".join(nerealizate) if nerealizate else "Toate au fost făcute!")
 
                     threading.Thread(target=send_via_smtp, args=(email_parinte, "Raport Zilnic", msg_raport)).start()
-                else:
-                    try:
-                        response = (
-                            supabase.table("children")
-                            .update({"check_verificare": False})
-                            .eq("connection_code", code)
-                            .execute()
-                        )
-                        if response.data:
-                            print("Produs actualizat cu succes:")
-                            print(response.data)
-                        else:
-                            print("Nu s-a găsit niciun produs cu ID-ul specificat sau nu s-au făcut modificări.")
-                            print(response.error)  # Afișează erorile, dacă există
-
-                    except Exception as e:
-                        print(f"A apărut o eroare: {e}")
             except:
                 pass
 
