@@ -103,7 +103,6 @@ def check_midtime_alerts():
                         .eq("connection_code", code)
                         .execute()
                     )
-                if v_start <= now < v_end:
                     realizate = []
                     nerealizate = []
                     mapping = {
