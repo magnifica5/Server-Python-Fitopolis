@@ -9,13 +9,14 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-
+print("am incarcat datele")
 EMAIL_SENDER = os.getenv("EMAIL")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+print("m am conectat ca client supabase")
 ACTIVITIES = ["trezire", "ex1", "masa_dimineata", "masa_pranz", "ex2", "masa_seara", "culcare"]
 
 def send_via_smtp(to, subject, message):
