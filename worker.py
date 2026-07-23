@@ -122,18 +122,25 @@ def check_midtime_alerts():
             except:
                 pass
 
-# Inițializare scheduler
+# 1. Inițializăm obiectul scheduler
 scheduler = APScheduler()
-if not scheduler.running:
-    scheduler.init_app(None) # Nu mai avem nevoie de instanța Flask aici
-    scheduler.add_job(id='check_alerts', func=check_midtime_alerts, trigger='interval', minutes=1)
+
+# 2. Adăugăm jobul direct (fără init_app)
+scheduler.add_job(
+    id='check_alerts', 
+    func=check_midtime_alerts, 
+    trigger='interval', 
+    minutes=1
+)
+
+# 3. Pornim scheduler-ul
+try:
     scheduler.start()
     print("APScheduler a pornit cu succes în worker.")
-else:
-    print("APScheduler rulează deja în worker.")
+except Exception as e:
+    print(f"Eroare la pornirea scheduler-ului: {e}")
 
-# Worker-ul nu are nevoie să ruleze o aplicație Flask, doar scheduler-ul
-# Puteți adăuga un loop infinit sau un sleep pentru a menține procesul activ
+# 4. Menținem procesul activ (foarte important pentru Render Background Worker)
 import time
 while True:
-    time.sleep(1) # Menține procesul worker activ
+    time.sleep(1)
