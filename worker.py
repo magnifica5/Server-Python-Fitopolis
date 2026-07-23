@@ -7,10 +7,9 @@ from flask_apscheduler import APScheduler
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-# Configurare
+
 load_dotenv()
 
-# Variabile de mediu
 EMAIL_SENDER = os.getenv("EMAIL")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -70,9 +69,7 @@ def check_midtime_alerts():
                     year=now.year, month=now.month, day=now.day
                 )
                 alert_time = start_time + timedelta(minutes=4)
-                end_interval = start_time + timedelta(minutes=7)
-
-                if alert_time <= now < end_interval:
+                if now.hour == alert_time.hour and now.minute == alert_time.minute:
                     if child_progres.get(activity) == 0:
                         nume_afisare = {
                             "trezire": "pregatirea de dimineata",
