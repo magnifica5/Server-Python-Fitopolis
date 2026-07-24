@@ -1,11 +1,11 @@
-import os
+import os # acces la sistem
 import threading
-import smtplib
-from email.mime.text import MIMEText
-from supabase import create_client, Client
-from flask_apscheduler import APScheduler
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
+import smtplib # canal pentru trimis emailuri
+from email.mime.text import MIMEText # ca sa pot trimite email cu text
+from supabase import create_client, Client # client supabase pt a obtine datele
+from flask_apscheduler import APScheduler # schedulerul petru verificare o data la minut
+from datetime import datetime, timedelta # timedelta transforma int in intervale orare, gen + 3 minute. datetime pentru timp
+from dotenv import load_dotenv # incarc fisierele din .env
 
 load_dotenv()
 print("am incarcat datele")
