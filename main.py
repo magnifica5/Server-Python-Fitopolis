@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/") # pentru uptime robot
 def home():
     return "OK", 200
 
